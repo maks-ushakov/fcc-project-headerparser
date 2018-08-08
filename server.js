@@ -28,11 +28,22 @@ app.get("/api/hello", function (req, res) {
 app.get("/api/whoami", function (req, res) {
   let headers = req.headers;
   res.json({
-    ipaddress: req.ip,
-    language: headers['accept-Language'],
+    ipaddress: getIp(req),
+    language: headers['accept-language'],
     software: headers['user-agent'],
   });
 });
+
+function getIp(req) {
+(req.ip || '').split(',').pop();
+  if (req.headers['x-forwarded-for']) {
+    return req.headers['x-forwarded-for'].split(',')[0];
+  }
+  if (req.connection && req.connection.remoteAddress) {
+    return req.connection.remoteAddress;
+  }
+  return req.ip;
+}
 
 // listen for requests :)
 const PORT = process.env.PORT || 3030;
